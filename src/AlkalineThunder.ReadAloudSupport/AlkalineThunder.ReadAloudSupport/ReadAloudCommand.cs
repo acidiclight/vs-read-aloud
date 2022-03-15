@@ -44,9 +44,52 @@ namespace AlkalineThunder.ReadAloudSupport
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
 
             var menuCommandID = new CommandID(CommandSet, CommandId);
-            var menuItem = new MenuCommand(this.Execute, menuCommandID);
+            var menuItem = new OleMenuCommand(this.Execute, menuCommandID);
+
+            menuItem.BeforeQueryStatus += HandleBeforeQueryStatus;
 
             commandService.AddCommand(menuItem);
+        }
+
+        private void HandleBeforeQueryStatus(object sender, EventArgs e)
+        {
+            // So the logic here is pretty much identical to the Rider version of this plugin.
+            // We need to check if there's an active editor. If there is no active editor, then
+            // we must completely hide the menu command.
+            //
+            // If there is an editor, but there is no  text selection, then we must make the command
+            // visible but grey it out in the menu.
+            //
+            // So let's do it.
+
+            // First grab the menu command.
+            var menuCommand = (OleMenuCommand)sender;
+
+            // Now let's check to see if there's an editor.
+            ThreadHelper.ThrowIfNotOnUIThread();
+            var dte = (DTE)package.GetServiceAsync(typeof(DTE)).GetAwaiter().GetResult();
+
+            // If that returned null, what the hell kind of IDE ARE WE USING!? Definitely hide the menu.
+            // If the DTE reports no active document, do the same
+            if (dte == null || dte.ActiveDocument == null)
+            {
+                menuCommand.Visible = false;
+                return;
+            }
+
+            // We can make it visible.
+            menuCommand.Visible = true;
+
+            // Check if there's a valid text selection.
+            var selection = (TextSelection)dte.ActiveDocument.Selection;
+            if (selection  != null && !string.IsNullOrWhiteSpace(selection.Text))
+            {
+                menuCommand.Enabled = true;
+            }
+            else
+            {
+                menuCommand.Enabled = false;
+            }
         }
 
         /// <summary>

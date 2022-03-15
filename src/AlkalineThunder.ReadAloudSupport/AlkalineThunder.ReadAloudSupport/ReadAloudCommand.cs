@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using EnvDTE;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.ComponentModel.Design;
@@ -93,8 +94,26 @@ namespace AlkalineThunder.ReadAloudSupport
         {
             ThreadHelper.ThrowIfNotOnUIThread();
 
-            // Read some text.
-            _tts.PrepareSpeech("Hello world!");
+            // Retrieve the selected text.
+            var selectedText = GetSelectedTextInEditorAsync().GetAwaiter().GetResult();
+
+            // Fucking read it lol.
+            _tts.PrepareSpeech(selectedText);
+        }
+
+        private async Task<string> GetSelectedTextInEditorAsync()
+        {
+            var dte = (DTE) (await this.package.GetServiceAsync(typeof(DTE)));
+
+            // Null-checks
+            if (dte == null || dte.ActiveDocument == null)
+                return string.Empty;
+
+            // Retrieve the active document selection.
+            var selection = (TextSelection)dte.ActiveDocument.Selection;
+
+            // Return the text.
+            return selection.Text;
         }
     }
 }

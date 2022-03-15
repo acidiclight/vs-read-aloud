@@ -55,6 +55,7 @@
     <Compile Include="AlkalineThunder.ReadAloudSupportPackage.cs" />
     <Compile Include="ReadAloudCommand.cs" />
     <Compile Include="ReadAloudCommandPackage.cs" />
+    <Compile Include="TtsManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Key.snk" />

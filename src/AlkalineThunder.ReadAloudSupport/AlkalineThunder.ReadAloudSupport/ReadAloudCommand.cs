@@ -14,6 +14,8 @@ namespace AlkalineThunder.ReadAloudSupport
     /// </summary>
     internal sealed class ReadAloudCommand
     {
+        private TtsManager _tts = new TtsManager();
+
         /// <summary>
         /// Command ID.
         /// </summary>
@@ -90,17 +92,9 @@ namespace AlkalineThunder.ReadAloudSupport
         private void Execute(object sender, EventArgs e)
         {
             ThreadHelper.ThrowIfNotOnUIThread();
-            string message = string.Format(CultureInfo.CurrentCulture, "Inside {0}.MenuItemCallback()", this.GetType().FullName);
-            string title = "ReadAloudCommand";
 
-            // Show a message box to prove we were here
-            VsShellUtilities.ShowMessageBox(
-                this.package,
-                message,
-                title,
-                OLEMSGICON.OLEMSGICON_INFO,
-                OLEMSGBUTTON.OLEMSGBUTTON_OK,
-                OLEMSGDEFBUTTON.OLEMSGDEFBUTTON_FIRST);
+            // Read some text.
+            _tts.PrepareSpeech("Hello world!");
         }
     }
 }
